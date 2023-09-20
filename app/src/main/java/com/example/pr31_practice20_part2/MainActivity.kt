@@ -19,16 +19,21 @@ import com.example.pr31_practice20_part2.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    lateinit var snackbar:Snackbar
-    lateinit var sPref:SharedPreferences
-    var count:String = ""
-    var temp:Int = 0
+    private lateinit var snackbar:Snackbar
+    private lateinit var sPref:SharedPreferences
+    private var count:String = ""
+    private var temp:Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        sPref = getPreferences(MODE_PRIVATE)
+        if (sPref.getString("count","").toString().isNotEmpty()){
+            temp = sPref.getString("count","").toString().toInt()
+        }
 
         binding.button1.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -40,21 +45,14 @@ class MainActivity : AppCompatActivity() {
             snackbar.setAction("Action", View.OnClickListener { Toast.makeText(this,"Ура каникулы? \uD83C\uDF38",Toast.LENGTH_SHORT).show() })
             snackbar.setActionTextColor(Color.YELLOW)
             snackbar.show()
-
         }
 
         binding.button3.setOnClickListener { view ->
-            temp++
+            Inc()
             Save()
             Load()
             val toast = Toast.makeText(this,"Clicks count: $temp",Toast.LENGTH_SHORT)
-            toast.setGravity(Gravity.END,200,900)
             toast.show()
-        }
-
-        sPref = getPreferences(MODE_PRIVATE)
-        if (sPref.getString("count","").toString().isNotEmpty()){
-            temp = sPref.getString("count","").toString().toInt()
         }
     }
 
@@ -74,18 +72,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun Inc(){
+        temp++
+    }
     fun Save(){
+        sPref = getPreferences(MODE_PRIVATE)
         val ed = sPref.edit()
-        ed.putString("count","").toString()
+        ed.putString("count",temp.toString())
         ed.apply()
     }
 
     fun Load(){
+        sPref = getPreferences(MODE_PRIVATE)
         count = sPref.getString("count","").toString()
     }
 
     override fun onStop(){
         super.onStop()
+        Save()
+    }
+
+    override fun onPause() {
+        super.onPause()
         Save()
     }
 }
